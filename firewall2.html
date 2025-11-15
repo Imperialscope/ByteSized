@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firewall Level 2 | ByteSized</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin:0; font-family:"Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0d1117; color:#e6edf3; }
+    a { color:#58a6ff; text-decoration:none; }
+
+    header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:#161b22; border-bottom:1px solid #30363d; }
+    header h1 { font-size:1.1rem; color:#58a6ff; margin:0; }
+    header nav a { margin-right:12px; }
+
+    .carousel { position:relative; min-height:80vh; overflow:hidden; }
+    .slides { display:flex; min-height:100%; transform:translateX(0%); transition: transform .5s ease; }
+    .slide { flex:0 0 100%; padding:32px 20px 88px; display:flex; flex-direction:column; align-items:center; gap:18px; }
+    .slide h2 { color:#58a6ff; margin:6px 0 4px; text-align:center; }
+    .slide p { max-width:900px; color:#c9d1d9; text-align:center; }
+
+    .nav { position:absolute; bottom:20px; background:#21262d; color:#e6edf3; border:1px solid #30363d; padding:10px 14px; border-radius:10px; cursor:pointer; }
+    .nav:hover { background:#2b3138; }
+    .prev { left:20px; } .next { right:20px; }
+    .dots { position:absolute; bottom:24px; left:50%; transform:translateX(-50%); display:flex; gap:10px; }
+    .dot { width:10px; height:10px; border-radius:50%; border:1px solid #58a6ff; background:transparent; cursor:pointer; }
+    .dot.active { background:#58a6ff; }
+
+    /* Slide visuals */
+    .diagram { position:relative; width:min(960px,95vw); height:300px; border:1px solid #30363d; background:#0f1620; border-radius:16px; overflow:hidden; }
+    .cloud { position:absolute; left:5%; top:50%; transform:translateY(-50%); width:120px; height:70px; border-radius:50px; background:#243041; box-shadow:0 0 0 2px #30363d inset; display:flex; align-items:center; justify-content:center; font-size:.9rem; color:#8b949e; }
+    .shield { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:86px; height:100px; background:linear-gradient(180deg,#233047,#1a2332); clip-path:path('M43 0 C60 8 80 26 80 48 C80 70 62 90 43 100 C24 90 6 70 6 48 C6 26 26 8 43 0 Z'); border:2px solid #30363d; }
+    .host { position:absolute; right:6%; top:50%; transform:translateY(-50%); width:120px; height:80px; border-radius:10px; background:#1a2332; box-shadow:0 0 0 2px #30363d inset; display:flex; align-items:center; justify-content:center; font-size:.9rem; color:#8b949e; }
+    .pkt { position:absolute; top:55%; left:8%; width:12px; height:12px; border-radius:50%; }
+    .pkt.good { background:#2ecc71; animation: pkt-allow 4.2s linear infinite; }
+    .pkt.bad { background:#ff6b6b; animation: pkt-block 4.2s linear infinite; animation-delay:1.2s; }
+    @keyframes pkt-allow { 0%{ left:8%; top:56%; } 45%{ left:50%; top:54%; } 60%{ left:54%; top:53%; } 100%{ left:86%; top:50%; } }
+    @keyframes pkt-block { 0%{ left:8%; top:66%; } 45%{ left:49%; top:66%; } 55%{ left:50%; top:66%; } 75%{ left:42%; top:70%; } 100%{ left:8%; top:74%; } }
+
+    .rules { width:min(960px,95vw); background:#161b22; border:1px solid #30363d; border-radius:16px; padding:16px; }
+    .rule { display:flex; align-items:center; justify-content:space-between; background:#0f1620; border:1px solid #30363d; border-radius:10px; padding:10px 12px; margin:8px 0; }
+    .pill { padding:4px 8px; border-radius:20px; font-size:.85rem; }
+    .allow { background:#0e3b28; color:#2ecc71; border:1px solid #2ecc71; }
+    .block { background:#3b2020; color:#ff6b6b; border:1px solid #ff6b6b; }
+    .match { animation: glow 1.2s ease-in-out infinite alternate; }
+    @keyframes glow { from{ box-shadow:0 0 0 rgba(88,166,255,0); } to{ box-shadow:0 0 14px rgba(88,166,255,.35); } }
+
+    .ports { position:relative; width:min(960px,95vw); background:#0f1620; border:1px solid #30363d; border-radius:16px; padding:18px 16px 30px; }
+    .port-bar { position:relative; height:6px; background:#243041; border-radius:4px; margin:20px 6px; }
+    .tick { position:absolute; top:-8px; width:2px; height:22px; background:#30363d; }
+    .label { position:absolute; top:18px; transform:translateX(-50%); font-size:.85rem; color:#8b949e; white-space:nowrap; }
+    .pulse { position:absolute; top:-10px; width:18px; height:18px; border-radius:50%; border:2px solid #58a6ff; animation:pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%{ opacity:.2; transform:translate(-50%,-50%) scale(.8); } 50%{ opacity:.8; transform:translate(-50%,-50%) scale(1.15); } 100%{ opacity:.2; transform:translate(-50%,-50%) scale(.8); } }
+
+    .actions { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+    .primary { background:#58a6ff; color:#0d1117; border:none; padding:10px 16px; border-radius:10px; font-weight:600; }
+    .ghost { background:#21262d; color:#e6edf3; border:1px solid #30363d; padding:10px 16px; border-radius:10px; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav><a href="Networking.html">Back to topics</a></nav>
+    <h1>Firewalls — Level 2</h1>
+    <span></span>
+  </header>
+  <main class="carousel" aria-label="Firewall Level 2 carousel">
+    <div class="slides" id="slides">
+      <!-- Slide 1: Technical definition -->
+      <section class="slide" aria-label="What is a firewall (technical)">
+        <h2>1) What is a Firewall (Technical)</h2>
+        <p>A firewall is a stateful packet filter and/or proxy that enforces a policy by inspecting packet headers (IP, TCP/UDP) and sometimes payload. It decides to ALLOW or DROP traffic based on tuples like source/destination IP, protocol, port, and connection state.</p>
+        <div class="diagram">
+          <div class="cloud">Internet</div>
+          <div class="shield" aria-hidden="true"></div>
+          <div class="host">Your PC</div>
+          <div class="pkt good" title="HTTPS 443"></div>
+          <div class="pkt bad" title="Blocked"></div>
+        </div>
+      </section>
+
+      <!-- Slide 2: Rules -->
+      <section class="slide" aria-label="Firewall rules">
+        <h2>2) Firewall Rules</h2>
+        <p>Rules are evaluated top-to-bottom to match traffic. A rule specifies criteria (IPs, protocol, port, direction) and an action (ALLOW or BLOCK). Stateful firewalls also track connection state to allow related packets.</p>
+        <div class="rules">
+          <div class="rule match"><span>ALLOW TCP to port 443 (HTTPS)</span><span class="pill allow">ALLOW</span></div>
+          <div class="rule"><span>BLOCK TCP to port 23 (Telnet)</span><span class="pill block">BLOCK</span></div>
+          <div class="rule"><span>ALLOW UDP 53 to DNS resolver</span><span class="pill allow">ALLOW</span></div>
+        </div>
+      </section>
+
+      <!-- Slide 3: Ports -->
+      <section class="slide" aria-label="Ports">
+        <h2>3) Ports</h2>
+        <p>Ports identify the application endpoint on a host. Common examples: 22 (SSH), 80 (HTTP), 443 (HTTPS). Firewalls match on destination port to control access to services.</p>
+        <div class="ports">
+          <div class="port-bar" aria-hidden="true"></div>
+          <div class="tick" style="left:15%"></div>
+          <div class="label" style="left:15%">22 SSH</div>
+          <div class="tick" style="left:45%"></div>
+          <div class="label" style="left:45%">80 HTTP</div>
+          <div class="tick" style="left:70%"></div>
+          <div class="label" style="left:70%">443 HTTPS</div>
+          <div class="pulse" style="left:70%"></div>
+        </div>
+      </section>
+
+      <!-- Slide 4: Congrats Level 2 -->
+      <section class="slide" aria-label="Level 2 complete">
+        <h2>Firewalls Level 2 Complete!</h2>
+        <p>Nice job. You covered technical definitions, rule logic, and ports.</p>
+        <div class="actions">
+          <a class="primary" href="Networking.html">Back to topics</a>
+          <button class="ghost" onclick="location.reload()">Replay</button>
+          <a class="primary" href="firewall3.html">Level 3</a>
+        </div>
+      </section>
+    </div>
+    <button class="nav prev" id="prev">Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nav next" id="next">Next</button>
+  </main>
+  <script>
+    const slides = document.getElementById('slides');
+    const dotsWrap = document.getElementById('dots');
+    const prev = document.getElementById('prev');
+    const next = document.getElementById('next');
+    const count = slides.children.length; let index=0; const dots=[];
+    function go(i){ index=(i+count)%count; slides.style.transform = `translateX(${-index*slides.parentElement.clientWidth}px)`; dots.forEach((d,j)=>d.classList.toggle('active',j===index)); next.textContent = index===count-1? 'Finish':'Next'; }
+    for(let i=0;i<count;i++){ const b=document.createElement('button'); b.className='dot'+(i===0?' active':''); b.addEventListener('click',()=>go(i)); dotsWrap.appendChild(b); dots.push(b); }
+    prev.addEventListener('click',()=>go(index-1)); next.addEventListener('click',()=>{ if(index===count-1) go(0); else go(index+1); });
+    window.addEventListener('keydown',e=>{ if(e.key==='ArrowRight') (index===count-1)? go(0):go(index+1); if(e.key==='ArrowLeft') go(index-1); });
+    window.addEventListener('resize',()=>go(index));
+  </script>
+</body>
+</html>

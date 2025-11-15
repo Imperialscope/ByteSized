@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Two‑Factor Auth | ByteSized</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0d1117;color:#e6edf3}
+    a{color:#58a6ff;text-decoration:none}
+    header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:#161b22;border-bottom:1px solid #30363d}
+    header h1{font-size:1.1rem;color:#58a6ff;margin:0}
+    .carousel{position:relative;height:calc(100vh - 70px);overflow:hidden}
+    .slides{display:flex;width:300%;height:100%;transform:translateX(0%);transition:transform .5s ease}
+    .slide{min-width:100%;padding:32px 20px 80px;display:flex;flex-direction:column;align-items:center;gap:18px}
+    .slide h2{color:#58a6ff;margin:6px 0 4px}
+    .slide p{max-width:900px;color:#c9d1d9;text-align:center}
+    .nav{position:absolute;bottom:20px;background:#21262d;color:#e6edf3;border:1px solid #30363d;padding:10px 14px;border-radius:10px;cursor:pointer}
+    .nav:hover{background:#2b3138}.prev{left:20px}.next{right:20px}
+    .dots{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:10px}
+    .dot{width:10px;height:10px;border-radius:50%;border:1px solid #58a6ff;background:transparent;cursor:pointer}
+    .dot.active{background:#58a6ff}
+    .card{width:min(880px,95vw);border:1px solid #30363d;background:#161b22;border-radius:14px;padding:18px}
+    .list li{margin:.4rem 0}
+    .badge{display:inline-flex;width:26px;height:26px;align-items:center;justify-content:center;border-radius:50%;background:#58a6ff;color:#0d1117;font-weight:700;margin-right:8px}
+  </style>
+</head>
+<body>
+  <header>
+    <nav><a href="ByteSized.html">← Back to topics</a></nav>
+    <h1>Two‑Factor Authentication (2FA)</h1><span></span>
+  </header>
+  <main class="carousel" aria-label="2FA carousel">
+    <div class="slides" id="slides">
+      <section class="slide">
+        <h2>1) Analogy: Two Locks</h2>
+        <div class="card"><p>
+          Your front door has a key, but you also use a passcode on the alarm. Even if someone copies your key, they still can’t
+          get in without the second code. That’s 2FA.
+        </p></div>
+      </section>
+      <section class="slide">
+        <h2>2) What Counts as 2FA?</h2>
+        <div class="card">
+          <ul class="list">
+            <li>App codes (Authenticator, 1Password, Authy) — best balance of security and ease.</li>
+            <li>Security keys (YubiKey, passkeys) — strongest option.</li>
+            <li>SMS codes — better than nothing, but weaker than app codes.</li>
+          </ul>
+        </div>
+      </section>
+      <section class="slide">
+        <h2>3) Turn On 2FA (Example: Google)</h2>
+        <div class="card">
+          <p><span class="badge">1</span>Go to myaccount.google.com → Security → “2‑Step Verification”.</p>
+          <p><span class="badge">2</span>Choose an Authenticator app; scan the QR; enter the 6‑digit code.</p>
+          <p><span class="badge">3</span>Save backup codes safely. Add an extra method like a security key.</p>
+        </div>
+      </section>
+    </div>
+    <button class="nav prev" id="prev">Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nav next" id="next">Next</button>
+  </main>
+  <script>
+    const slides = document.getElementById('slides');
+    const dotsWrap = document.getElementById('dots');
+    const prev = document.getElementById('prev');
+    const next = document.getElementById('next');
+    const count = slides.children.length; let index=0; const dots=[];
+    for(let i=0;i<count;i++){const b=document.createElement('button');b.className='dot'+(i===0?' active':'');b.addEventListener('click',()=>go(i));dotsWrap.appendChild(b);dots.push(b);} 
+    function go(i){index=(i+count)%count;slides.style.transform=`translateX(${-100*index}%)`;dots.forEach((d,j)=>d.classList.toggle('active',j===index));}
+    prev.addEventListener('click',()=>go(index-1)); next.addEventListener('click',()=>go(index+1));
+    window.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(index+1); if(e.key==='ArrowLeft')go(index-1);});
+  </script>
+</body>
+</html>

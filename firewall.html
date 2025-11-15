@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firewall | ByteSized</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0d1117; color:#e6edf3; }
+    a { color:#58a6ff; text-decoration:none; }
+
+    header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:#161b22; border-bottom:1px solid #30363d; }
+    header h1 { font-size:1.1rem; color:#58a6ff; margin:0; }
+    header nav a { margin-right:12px; }
+
+    .carousel { position:relative; min-height:80vh; overflow:hidden; }
+    .slides { display: flex; min-height:100%; transform: translateX(0%); transition: transform .5s ease; }
+    .slide { flex: 0 0 100%; padding:32px 20px 80px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:20px; }
+    .slide h2 { color:#58a6ff; margin:6px 0 4px; }
+    .slide p { max-width:900px; color:#c9d1d9; text-align:center; }
+
+    .nav { position:absolute; bottom:20px; background:#21262d; color:#e6edf3; border:1px solid #30363d; padding:10px 14px; border-radius:10px; cursor:pointer; }
+    .nav:hover { background:#2b3138; }
+    .prev { left:20px; }
+    .next { right:20px; }
+    .dots { position:absolute; bottom:24px; left:50%; transform:translateX(-50%); display:flex; gap:10px; }
+    .dot { width:10px; height:10px; border-radius:50%; border:1px solid #58a6ff; background:transparent; cursor:pointer; }
+    .dot.active { background:#58a6ff; }
+    .hide { display:none !important; }
+
+    /* Slide 1 - Guard analogy scene */
+    .scene { position:relative; width:min(950px, 95vw); height:320px; border:1px solid #30363d; border-radius:16px; background:linear-gradient(180deg,#0f1620,#0b1117); overflow:hidden; }
+    .gate { position:absolute; left:48%; top:0; bottom:0; width:4%; background:#39424c; box-shadow: inset 0 0 0 3px #30363d; }
+    .guard { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:70px; height:70px; border-radius:50%; background:#f1c40f; box-shadow:0 0 0 3px #30363d; display:flex; align-items:center; justify-content:center; font-weight:600; color:#0d1117; }
+    .person { position:absolute; top:70%; width:22px; height:22px; border-radius:50%; }
+    .good { background:#2ecc71; animation: goodWalk 4.5s linear infinite; }
+    .bad { background:#ff6b6b; animation: badWalk 4.5s linear infinite; animation-delay:1.5s; }
+    @keyframes goodWalk {
+      0% { left:-5%; top:70%; opacity:1; }
+      40% { left:46%; }
+      50% { left:52%; top:64%; }
+      100%{ left:110%; top:58%; }
+    }
+    @keyframes badWalk {
+      0% { left:-10%; top:78%; opacity:1; }
+      40% { left:46%; top:78%; }
+      50% { left:48%; top:78%; transform:scale(1); }
+      60% { left:48%; top:78%; transform:scale(0.2); opacity:0; }
+      100%{ left:48%; opacity:0; }
+    }
+
+    /* Slide 2 - Simple flow animation */
+    .flow { position:relative; width:min(900px,95vw); height:280px; border:1px solid #30363d; border-radius:16px; background:#0f1620; overflow:hidden; }
+    .cloud { position:absolute; left:6%; top:50%; transform:translateY(-50%); width:120px; height:70px; border-radius:50px; background:#243041; box-shadow:0 0 0 2px #30363d inset; display:flex; align-items:center; justify-content:center; }
+    .pc { position:absolute; right:6%; top:50%; transform:translateY(-50%); width:120px; height:80px; border-radius:10px; background:#1a2332; box-shadow:0 0 0 2px #30363d inset; display:flex; align-items:center; justify-content:center; }
+    .wall { position:absolute; left:50%; top:10%; bottom:10%; width:12px; background:#b34a3c; box-shadow: inset 0 0 0 3px #7a2d24; }
+    .packet { position:absolute; top:55%; left:8%; width:12px; height:12px; border-radius:50%; }
+    .packet.good { background:#2ecc71; animation: allow 4s linear infinite; }
+    .packet.bad { background:#ff6b6b; animation: block 4s linear infinite; animation-delay:1.2s; }
+    @keyframes allow {
+      0% { left:8%; top:55%; }
+      45% { left:50%; top:53%; }
+      60% { left:54%; top:52%; }
+      100%{ left:86%; top:50%; }
+    }
+    @keyframes block {
+      0% { left:8%; top:65%; }
+      45% { left:49%; top:66%; }
+      55% { left:50%; top:66%; }
+      75% { left:42%; top:70%; }
+      100%{ left:8%; top:72%; }
+    }
+
+    /* Slide 3 - Steps */
+    .steps { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap:14px; width:min(980px,95vw); }
+    .step { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:16px; }
+    .badge { display:inline-flex; width:26px; height:26px; align-items:center; justify-content:center; border-radius:50%; background:#58a6ff; color:#0d1117; font-weight:700; margin-right:8px; }
+    .hint { color:#8b949e; font-size:.95rem; }
+
+    /* Congrats screen */
+    .congrats {
+      display:none;
+      min-height:80vh;
+      padding:40px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      flex-direction:column;
+      gap:24px;
+    }
+    .congrats h2 { color:#58a6ff; font-size:2rem; margin:0; }
+    .congrats p { color:#c9d1d9; max-width:700px; }
+
+    /* Badge with firewall (SVG inside a circle) */
+    .firewall-badge {
+      width:140px; height:140px;
+      border-radius:50%;
+      background:#161b22;
+      border:2px solid #58a6ff;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    }
+    .congrats-actions { display:flex; gap:12px; }
+    .primary {
+      background:#58a6ff; color:#0d1117; border:none; border-radius:10px; padding:10px 16px; cursor:pointer;
+    }
+    .ghost {
+      background:transparent; color:#58a6ff; border:1px solid #58a6ff; border-radius:10px; padding:10px 16px; cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="Networking.html">← Back to topics</a>
+    </nav>
+    <h1>Firewall</h1>
+    <span></span>
+  </header>
+
+  <main>
+    <!-- Carousel -->
+    <section class="carousel" id="carousel" aria-label="Firewall learning carousel">
+      <div class="slides" id="slides">
+        <!-- Slide 1 -->
+        <section class="slide" aria-label="Analogy: guard at a building">
+          <h2>1) Guard at the Door</h2>
+          <div class="scene" aria-hidden="true">
+            <div class="gate"></div>
+            <div class="guard">Guard</div>
+            <div class="person good" title="Allowed"></div>
+            <div class="person bad" title="Blocked"></div>
+          </div>
+          <p>
+            Imagine a building with a guard at the entrance. People with badges walk in; strangers are stopped.
+            A firewall works the same way: it checks where traffic comes from and where it’s going. Safe traffic is
+            allowed through, suspicious traffic is blocked (or “dropped”).
+          </p>
+        </section>
+
+        <!-- Slide 2 -->
+        <section class="slide" aria-label="What is a firewall">
+          <h2>2) What Is a Firewall?</h2>
+          <div class="flow" aria-hidden="true">
+            <div class="cloud">Internet</div>
+            <div class="wall" title="Firewall"></div>
+            <div class="pc">Your Device</div>
+            <div class="packet good" title="Allowed packet"></div>
+            <div class="packet bad" title="Blocked packet"></div>
+          </div>
+          <p>
+            A firewall is a filter for network traffic. It follows simple rules like “allow web browsing out to the internet” or
+            “block unknown apps from coming into your device.” Think of it as a list of allowed/blocked doors and guests.
+            When the guest (traffic) matches the correct ID (an allowed rule), it passes; if it matches a wrong ID (blocked rule),
+            it’s stopped.
+          </p>
+        </section>
+
+        <!-- Slide 3 -->
+              <section class="slide hide" aria-label="Use your firewall">
+          <h2>3) Use Your Firewall (Windows 10/11)</h2>
+          <div class="steps">
+            <div class="step">
+              <div><span class="badge">1</span><strong>Open Windows Security</strong></div>
+              <p class="hint">Press the Start key, type "Windows Security", open it, then choose "Firewall & network protection".</p>
+            </div>
+            <div class="step">
+              <div><span class="badge">2</span><strong>Check network status</strong></div>
+              <p class="hint">You’ll see Domain, Private, and Public networks. The toggle shows whether the firewall is On.</p>
+            </div>
+            <div class="step">
+              <div><span class="badge">3</span><strong>Allow an app through</strong></div>
+              <p class="hint">Click "Allow an app through firewall" → "Change settings" → tick the app → choose Private/Public → OK.</p>
+            </div>
+            <div class="step">
+              <div><span class="badge">4</span><strong>Create a rule (advanced)</strong></div>
+              <p class="hint">Select "Advanced settings" → Inbound or Outbound Rules → New Rule. Pick Program or Port, choose Allow or Block, then finish.</p>
+            </div>
+            <div class="step">
+              <div><span class="badge">5</span><strong>Keep it simple</strong></div>
+              <p class="hint">Allow only what you use. If something pops up unexpectedly, don’t allow it unless you trust the app.</p>
+            </div>
+          </div>
+          <p class="hint">On macOS: System Settings → Network → Firewall. Toggle On and add app rules in Firewall Options.</p>
+        </section>
+      </div>
+
+      <button class="nav prev" id="prev" aria-label="Previous slide">Prev</button>
+      <div class="dots" id="dots" aria-label="Slide indicators"></div>
+      <button class="nav next" id="next" aria-label="Next slide">Next</button>
+    </section>
+
+    <!-- Congrats screen (hidden until Finish) -->
+    <section id="congrats" class="congrats" aria-hidden="true">
+      <div class="firewall-badge" aria-hidden="true">
+        <!-- Simple firewall icon: brick wall + flame -->
+        <svg width="92" height="92" viewBox="0 0 92 92" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Firewall badge">
+          <!-- Wall background -->
+          <rect x="10" y="30" width="72" height="36" rx="6" fill="#1e2633" stroke="#30363d" stroke-width="2"/>
+          <!-- Bricks -->
+          <rect x="16" y="34" width="16" height="10" fill="#b34a3c"/>
+          <rect x="36" y="34" width="16" height="10" fill="#b34a3c"/>
+          <rect x="56" y="34" width="16" height="10" fill="#b34a3c"/>
+
+          <rect x="26" y="46" width="16" height="10" fill="#b34a3c"/>
+          <rect x="46" y="46" width="16" height="10" fill="#b34a3c"/>
+
+          <rect x="16" y="58" width="16" height="10" fill="#b34a3c"/>
+          <rect x="36" y="58" width="16" height="10" fill="#b34a3c"/>
+          <rect x="56" y="58" width="16" height="10" fill="#b34a3c"/>
+
+          <!-- Flame (stylized) -->
+          <path d="M64 50c-6 -8 -2 -14 -2 -14c-7 5 -10 9 -11 13c-3 -3 -4 -7 -3 -11c-6 6 -9 12 -7 18c2 7 9 10 13 10c9 0 16 -7 16 -14c0 -2 -1 -4 -2 -6c-1 2 -2 3 -4 4z" fill="#ff6b6b"/>
+        </svg>
+      </div>
+      <h2>Congratulations on learning about the firewall!</h2>
+      <p>You’ve completed the ByteSized intro to firewalls. Keep exploring to strengthen your security basics.</p>
+      <div class="congrats-actions">
+        <a class="primary" href="Networking.html">Back to Topics</a>
+        <button class="ghost" onclick="location.reload()">Replay</button>
+        <a class="primary" href="firewall2.html">Level 2</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const slides = document.getElementById('slides');
+    const dotsWrap = document.getElementById('dots');
+    const prev = document.getElementById('prev');
+    const next = document.getElementById('next');
+    const carousel = document.getElementById('carousel');
+    const congrats = document.getElementById('congrats');
+
+    const visibleSlides = Array.from(slides.children).filter(s => getComputedStyle(s).display !== 'none');
+    const count = visibleSlides.length; // number of visible .slide sections
+    let index = 0;
+    let viewportWidth = 0; // width of the carousel viewport in px
+
+    // Build dots
+    const dots = [];
+    for (let i = 0; i < count; i++) {
+      const b = document.createElement('button');
+      b.className = 'dot' + (i === 0 ? ' active' : '');
+      b.setAttribute('aria-label', `Slide ${i+1}`);
+      b.addEventListener('click', () => go(i));
+      dotsWrap.appendChild(b);
+      dots.push(b);
+    }
+
+    function measure() {
+      viewportWidth = slides.parentElement.clientWidth; // .carousel width
+      slides.style.transform = `translateX(${-index * viewportWidth}px)`;
+    }
+
+    function updateNextLabel() {
+      next.textContent = (index === count - 1) ? 'Finish' : 'Next';
+      next.setAttribute('aria-label', (index === count - 1) ? 'Finish course' : 'Next slide');
+    }
+
+    function showCongrats() {
+      // Hide carousel, show congrats
+      carousel.style.display = 'none';
+      congrats.style.display = 'flex';
+      congrats.setAttribute('aria-hidden', 'false');
+    }
+
+    function go(i) {
+      index = (i + count) % count;
+      slides.style.transform = `translateX(${-index * viewportWidth}px)`;
+      dots.forEach((d, di) => d.classList.toggle('active', di === index));
+      updateNextLabel();
+    }
+
+    prev.addEventListener('click', () => go(index - 1));
+
+    next.addEventListener('click', () => {
+      if (index === count - 1) {
+        // On last slide: Finish
+        showCongrats();
+      } else {
+        go(index + 1);
+      }
+    });
+
+    // Keyboard access
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        if (document.activeElement === next || document.activeElement === prev || document.activeElement === document.body) {
+          (index === count - 1) ? showCongrats() : go(index + 1);
+        }
+      }
+      if (e.key === 'ArrowLeft') go(index - 1);
+    });
+
+    window.addEventListener('load', () => {
+      measure();
+      updateNextLabel();
+    });
+    window.addEventListener('resize', measure);
+  </script>
+</body>
+</html>

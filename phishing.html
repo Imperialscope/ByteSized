@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phishing | ByteSized</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0d1117;color:#e6edf3}
+    a{color:#58a6ff;text-decoration:none}
+    header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:#161b22;border-bottom:1px solid #30363d}
+    header h1{font-size:1.1rem;color:#58a6ff;margin:0}
+    .carousel{position:relative;height:calc(100vh - 70px);overflow:hidden}
+    .slides{display:flex;width:300%;height:100%;transform:translateX(0%);transition:transform .5s ease}
+    .slide{min-width:100%;padding:32px 20px 80px;display:flex;flex-direction:column;align-items:center;gap:18px}
+    .slide h2{color:#58a6ff;margin:6px 0 4px}
+    .slide p{max-width:900px;color:#c9d1d9;text-align:center}
+    .nav{position:absolute;bottom:20px;background:#21262d;color:#e6edf3;border:1px solid #30363d;padding:10px 14px;border-radius:10px;cursor:pointer}
+    .nav:hover{background:#2b3138}.prev{left:20px}.next{right:20px}
+    .dots{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:10px}
+    .dot{width:10px;height:10px;border-radius:50%;border:1px solid #58a6ff;background:transparent;cursor:pointer}
+    .dot.active{background:#58a6ff}
+    .card{width:min(880px,95vw);border:1px solid #30363d;background:#161b22;border-radius:14px;padding:18px}
+    .list li{margin:.4rem 0}
+
+    /* Slide 1 animation: fish swims toward a hook */
+    .analogy-anim{position:relative;width:min(880px,95vw);height:120px;margin-top:6px}
+    .analogy-anim .line{position:absolute;top:0;left:50%;width:2px;height:72px;background:#58a6ff;transform:translateX(-50%);opacity:.8;animation:sway 3s ease-in-out infinite}
+    .analogy-anim .hook{position:absolute;top:64px;left:50%;transform:translateX(-50%) rotate(10deg);font-size:28px;filter:drop-shadow(0 2px 6px rgba(88,166,255,.35));animation:sway 3s ease-in-out infinite}
+    .analogy-anim .fish{position:absolute;bottom:8px;left:8px;font-size:28px;animation:swim 6s ease-in-out infinite}
+    @keyframes sway{0%,100%{transform:translateX(-50%) rotate(8deg)}50%{transform:translateX(-50%) rotate(-8deg)}}
+    @keyframes swim{0%{transform:translateX(0) translateY(0) scaleX(1)}45%{transform:translateX(45%) translateY(-6px) scaleX(1)}50%{transform:translateX(45%) translateY(-6px) scaleX(-1)}95%{transform:translateX(calc(100% - 56px)) translateY(0) scaleX(-1)}100%{transform:translateX(calc(100% - 56px)) translateY(0) scaleX(-1)}}
+    .slide:not(.active) .analogy-anim *{animation-play-state:paused}
+    @media (prefers-reduced-motion: reduce){.analogy-anim *{animation:none!important}}
+  </style>
+</head>
+<body>
+  <header>
+    <nav><a href="ByteSized.html">← Back to topics</a></nav>
+    <h1>Phishing</h1><span></span>
+  </header>
+  <main class="carousel" aria-label="Phishing carousel">
+    <div class="slides" id="slides">
+      <section class="slide">
+        <h2>1) Analogy: Fishing for Clicks</h2>
+        <div class="analogy-anim" role="img" aria-label="A fish swimming toward a hook, representing phishing.">
+          <span class="line" aria-hidden="true"></span>
+          <span class="hook" aria-hidden="true">🎣</span>
+          <span class="fish" aria-hidden="true">🐟</span>
+        </div>
+        <div class="card"><p>
+          Just like a fisherman uses bait to catch fish, scammers use fake emails, texts, or sites to “hook” you into giving
+          passwords, money, or control of your device.
+        </p></div>
+      </section>
+      <section class="slide">
+        <h2>2) How to Spot It</h2>
+        <div class="card">
+          <ul class="list">
+            <li>Sender looks odd or spelling is off.</li>
+            <li>Urgent tone: “Your account will be closed!”</li>
+            <li>Links go to a strange address when you hover.</li>
+            <li>Unexpected attachments or requests for codes/passwords.</li>
+          </ul>
+        </div>
+      </section>
+      <section class="slide">
+        <h2>3) Do This Now</h2>
+        <div class="card">
+          <p><strong>Verify first:</strong> If unsure, don’t click. Open the website directly in a new tab or call the company.</p>
+          <p><strong>Report:</strong> In Gmail, open the message → More ⋮ → Report phishing. In Outlook, use the Report button if available.</p>
+          <p><strong>Protect:</strong> Turn on two‑factor authentication, and use a password manager so one stolen password doesn’t unlock everything.</p>
+        </div>
+      </section>
+    </div>
+    <button class="nav prev" id="prev">Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nav next" id="next">Next</button>
+  </main>
+  <script>
+    const slides = document.getElementById('slides');
+    const dotsWrap = document.getElementById('dots');
+    const prev = document.getElementById('prev');
+    const next = document.getElementById('next');
+    const count = slides.children.length; let index=0; const dots=[];
+    const slideEls = Array.from(slides.children);
+    for(let i=0;i<count;i++){const b=document.createElement('button');b.className='dot'+(i===0?' active':'');b.addEventListener('click',()=>go(i));dotsWrap.appendChild(b);dots.push(b);} 
+    // Mark initial active slide
+    slideEls[0]?.classList.add('active');
+    function go(i){
+      index=(i+count)%count;
+      slides.style.transform=`translateX(${-100*index}%)`;
+      dots.forEach((d,j)=>d.classList.toggle('active',j===index));
+      slideEls.forEach((s,j)=>s.classList.toggle('active',j===index));
+    }
+    prev.addEventListener('click',()=>go(index-1)); next.addEventListener('click',()=>go(index+1));
+    window.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(index+1); if(e.key==='ArrowLeft')go(index-1);});
+  </script>
+</body>
+</html>

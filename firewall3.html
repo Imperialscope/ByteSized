@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firewall Level 3 | ByteSized</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height:100%; }
+    body { margin:0; font-family:"Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0d1117; color:#e6edf3; }
+    a { color:#58a6ff; text-decoration:none; }
+
+    header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:#161b22; border-bottom:1px solid #30363d; }
+    header h1 { font-size:1.1rem; color:#58a6ff; margin:0; }
+
+    .carousel { position:relative; min-height:80vh; overflow:hidden; }
+    .slides { display:flex; min-height:100%; transform:translateX(0%); transition: transform .5s ease; }
+    .slide { flex:0 0 100%; padding:32px 20px 88px; display:flex; flex-direction:column; align-items:center; gap:18px; }
+    .slide h2 { color:#58a6ff; margin:6px 0 4px; text-align:center; }
+    .slide p, .slide ul { max-width:900px; color:#c9d1d9; }
+    .slide p { text-align:center; }
+    ul.steps { list-style: none; padding:0; width:min(900px,95vw); }
+    ul.steps li { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:12px 14px; margin:8px 0; display:flex; gap:10px; align-items:flex-start; }
+    .num { display:inline-flex; width:26px; height:26px; align-items:center; justify-content:center; border-radius:50%; background:#58a6ff; color:#0d1117; font-weight:700; }
+
+    .panel { width:min(960px,95vw); border:1px solid #30363d; background:#0f1620; border-radius:16px; padding:16px; }
+    .highlight { animation: glow 1.2s ease-in-out infinite alternate; }
+    @keyframes glow { from{ box-shadow:0 0 0 rgba(88,166,255,0); } to{ box-shadow:0 0 14px rgba(88,166,255,.35); } }
+
+    .actions { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+    .primary { background:#58a6ff; color:#0d1117; border:none; padding:10px 16px; border-radius:10px; font-weight:600; }
+    .ghost { background:#21262d; color:#e6edf3; border:1px solid #30363d; padding:10px 16px; border-radius:10px; }
+
+    .quiz { width:min(960px,95vw); background:#161b22; border:1px solid #30363d; border-radius:16px; padding:16px; }
+    .q { margin:10px 0; }
+    .result { margin-top:10px; color:#c9d1d9; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav><a href="Networking.html">Back to topics</a></nav>
+    <h1>Firewalls — Level 3</h1>
+    <span></span>
+  </header>
+  <main class="carousel" aria-label="Firewall Level 3 carousel">
+    <div class="slides" id="slides">
+      <!-- Slide 1: Open Windows Security -->
+      <section class="slide" aria-label="Open Windows Security">
+        <h2>1) Open Windows Security</h2>
+        <div class="panel">
+          <ul class="steps">
+            <li><span class="num">1</span> Press Start and type <strong>Windows Security</strong>. Open it. <em class="highlight">This is where Windows Defender Firewall lives.</em></li>
+            <li><span class="num">2</span> Choose <strong>Firewall &amp; network protection</strong>.</li>
+            <li><span class="num">3</span> Review Domain, Private, Public network status.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Slide 2: Allow an app -->
+      <section class="slide" aria-label="Allow an app through firewall">
+        <h2>2) Allow an App Through Firewall</h2>
+        <div class="panel">
+          <ul class="steps">
+            <li><span class="num">1</span> Click <strong>Allow an app through firewall</strong>.</li>
+            <li><span class="num">2</span> Click <strong>Change settings</strong>, tick the app, and choose <em>Private</em> and/or <em>Public</em>.</li>
+            <li><span class="num">3</span> Click <strong>OK</strong> to apply.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Slide 3: Inbound port rule -->
+      <section class="slide" aria-label="Create inbound port rule">
+        <h2>3) Create an Inbound Port Rule</h2>
+        <div class="panel">
+          <ul class="steps">
+            <li><span class="num">1</span> Click <strong>Advanced settings</strong> to open Windows Defender Firewall with Advanced Security.</li>
+            <li><span class="num">2</span> Choose <strong>Inbound Rules</strong> → <strong>New Rule...</strong></li>
+            <li><span class="num">3</span> Select <strong>Port</strong> → <em>TCP</em> → <em>Specific local ports</em> (e.g., 8080).</li>
+            <li><span class="num">4</span> Choose <strong>Allow</strong> or <strong>Block</strong> → Apply to profiles → Name the rule → Finish.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Slide 4: Outbound rule -->
+      <section class="slide" aria-label="Create outbound rule">
+        <h2>4) Create an Outbound Rule</h2>
+        <div class="panel">
+          <ul class="steps">
+            <li><span class="num">1</span> In the left panel choose <strong>Outbound Rules</strong> → <strong>New Rule...</strong></li>
+            <li><span class="num">2</span> Choose <strong>Program</strong> or <strong>Port</strong>, set the path/port and protocol.</li>
+            <li><span class="num">3</span> Pick <strong>Block</strong> to prevent traffic or <strong>Allow</strong> to permit, then scope to profiles.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Slide 5: Quiz -->
+      <section class="slide" aria-label="Quiz">
+        <h2>5) Quick Check (5 Questions)</h2>
+        <div class="quiz" id="quiz">
+          <div class="q" data-q="1">
+            <p>1) Which port is HTTPS?</p>
+            <label><input type="radio" name="q1"> 80</label>
+            <label><input type="radio" name="q1" data-correct> 443</label>
+            <label><input type="radio" name="q1"> 25</label>
+          </div>
+          <div class="q" data-q="2">
+            <p>2) A rule that matches TCP destination 23 with action BLOCK will?</p>
+            <label><input type="radio" name="q2" data-correct> Block Telnet traffic</label>
+            <label><input type="radio" name="q2"> Allow DNS traffic</label>
+            <label><input type="radio" name="q2"> Block HTTPS traffic</label>
+          </div>
+          <div class="q" data-q="3">
+            <p>3) Stateful means the firewall can?</p>
+            <label><input type="radio" name="q3" data-correct> Track connection state and related packets</label>
+            <label><input type="radio" name="q3"> Only match IP addresses</label>
+            <label><input type="radio" name="q3"> Only block outbound</label>
+          </div>
+          <div class="q" data-q="4">
+            <p>4) To allow a local web server you most likely open?</p>
+            <label><input type="radio" name="q4"> UDP 53</label>
+            <label><input type="radio" name="q4" data-correct> TCP 80 or 443</label>
+            <label><input type="radio" name="q4"> TCP 23</label>
+          </div>
+          <div class="q" data-q="5">
+            <p>5) Outbound rule blocking a program affects?</p>
+            <label><input type="radio" name="q5" data-correct> That program’s attempts to reach the network</label>
+            <label><input type="radio" name="q5"> Incoming connections to all services</label>
+            <label><input type="radio" name="q5"> Wi‑Fi password strength</label>
+          </div>
+          <div class="actions">
+            <button class="primary" id="check">Check Answers</button>
+          </div>
+          <div class="result" id="result" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Slide 6: Final Congrats -->
+      <section class="slide" aria-label="Finished Firewalls">
+        <h2>Congratulations on finishing Topic: Firewalls</h2>
+        <div class="actions">
+          <a class="primary" href="Networking.html">Back to topics</a>
+          <button class="ghost" onclick="location.reload()">Replay</button>
+        </div>
+      </section>
+    </div>
+    <button class="nav prev" id="prev">Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nav next" id="next">Next</button>
+  </main>
+  <script>
+    const slides = document.getElementById('slides');
+    const dotsWrap = document.getElementById('dots');
+    const prev = document.getElementById('prev');
+    const next = document.getElementById('next');
+    const count = slides.children.length; let index=0; const dots=[];
+    function go(i){ index=(i+count)%count; slides.style.transform = `translateX(${-index*slides.parentElement.clientWidth}px)`; dots.forEach((d,j)=>d.classList.toggle('active',j===index)); next.textContent = index===count-1? 'Finish':'Next'; }
+    for(let i=0;i<count;i++){ const b=document.createElement('button'); b.className='dot'+(i===0?' active':''); b.addEventListener('click',()=>go(i)); dotsWrap.appendChild(b); dots.push(b); }
+    prev.addEventListener('click',()=>go(index-1)); next.addEventListener('click',()=>{ if(index===count-1) go(0); else go(index+1); });
+    window.addEventListener('keydown',e=>{ if(e.key==='ArrowRight') (index===count-1)? go(0):go(index+1); if(e.key==='ArrowLeft') go(index-1); });
+    window.addEventListener('resize',()=>go(index));
+
+    // Quiz logic
+    const checkBtn = document.getElementById('check');
+    if(checkBtn){
+      checkBtn.addEventListener('click',()=>{
+        const qs = Array.from(document.querySelectorAll('.q'));
+        let correct=0;
+        qs.forEach(q=>{
+          const sel = q.querySelector('input[type="radio"]:checked');
+          const ok = sel && sel.hasAttribute('data-correct');
+          if(ok) correct++;
+        });
+        const res = document.getElementById('result');
+        res.textContent = `You got ${correct} / ${qs.length} correct.`;
+      });
+    }
+  </script>
+</body>
+</html>
